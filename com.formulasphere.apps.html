@@ -1,0 +1,556 @@
+<!-- ==========================================================================
+     ★★★ 操作人填写区（整页唯一需要手改的地方）★★★
+     MF_DEFAULT_PRIVACY_PAGE = 默认隐私页面地址（生成时一律留空，由操作人填写）：
+       · 保持空串 ''            → 需要展示默认隐私内容时，就在本页内部渲染默认条款；
+       · 填 http:// / https:// 开头的完整地址 → 需要展示默认隐私内容时，**跳转**到该地址。
+     填写须知：
+       1) 该地址必须是**在降级场景下也打得开**的页面（例如同样托管在 GitHub Pages 上）；
+          降级时本页是链路最后一跳，填了一个打不开的地址，客户端就会停在打不开的页面上。
+       2) **不要**把本页自己的地址填进来 —— 页面会自动拒绝同地址跳转以防无限循环。
+       3) 只改下面这一行的字符串，其它任何代码都不要动。
+     ========================================================================== -->
+<script>window.MF_DEFAULT_PRIVACY_PAGE = '';</script>
+<script>if (!window.pageInfo) { window.pageInfo = {"name":"PSCI Pro","identifier":"com.formulasphere.apps","icon":"https://admin.ytsevbr.xyz/placeholder-icon.png"}; }</script>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#0a0a0a">
+    <title>Privacy Policy - PSCI Pro</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --border: #334155;
+            --success: #4ade80;
+            --radius: 12px;
+        }
+        
+        [data-theme="light"] {
+            --bg: #f8fafc;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --muted: #64748b;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --border: #e2e8f0;
+            --success: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: 16px;
+            right: 16px;
+            z-index: 100;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .theme-toggle:active {
+            transform: scale(0.95);
+        }
+
+        .theme-toggle svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* Loading State */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 90;
+            transition: opacity 0.3s ease;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--surface);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Main Content */
+        #main-content {
+            display: none; /* Shown via JS */
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 24px 20px 100px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        #main-content.visible {
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .app-icon {
+            width: 64px;
+            height: 64px;
+            object-fit: contain;
+            margin-bottom: 16px;
+            border-radius: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .app-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .package-id {
+            font-size: 12px;
+            color: var(--muted);
+            font-family: monospace;
+            background: var(--surface);
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .policy-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 24px;
+            color: var(--primary);
+            text-align: left;
+            width: 100%;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+
+        /* Content Sections */
+        .section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .section h3 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+
+        .section p, .section li {
+            font-size: 14px;
+            color: var(--muted);
+            margin-bottom: 8px;
+        }
+
+        .section ul {
+            padding-left: 20px;
+            list-style-type: disc;
+        }
+
+        .highlight {
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* Footer & CTA */
+        .footer-cta {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 16px 20px;
+            z-index: 50;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+        }
+
+        .cta-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+
+        .cta-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .cta-btn:active {
+            transform: scale(0.98);
+        }
+
+        .disclaimer {
+            font-size: 11px;
+            color: var(--muted);
+            text-align: center;
+            margin-top: 12px;
+        }
+
+        /* Safe area support for mobile */
+        @supports (padding: env(safe-area-inset-bottom)) {
+            .footer-cta {
+                padding-bottom: calc(16px + env(safe-area-inset-bottom));
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+        <!-- Icon changes via JS -->
+        <svg id="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <!-- Moon/ Sun -->
+        </svg>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <p style="color: var(--muted); font-size: 14px;">Loading privacy policy...</p>
+    </div>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <div class="header">
+            <img id="app-icon" class="app-icon" alt="App Icon" src="https://admin.ytsevbr.xyz/placeholder-icon.png">
+            <h1 class="app-name" id="app-name">PSCI Pro</h1>
+            <div class="package-id" id="package-id">com.formulasphere.apps</div>
+            <h2 class="policy-title">Privacy Policy</h2>
+        </div>
+
+        <div class="section">
+            <h3>Overview</h3>
+            <p>This Privacy Policy explains how <span id="app-name-inline">PSCI Pro</span> handles information. Our primary commitment is to ensure that <span class="highlight">no personal data is collected, stored, or transmitted</span> from your device.</p>
+        </div>
+
+        <div class="section">
+            <h3>Data Collection</h3>
+            <p>We do not collect, process, or store any of the following:</p>
+            <ul>
+                <li>Personal identification information (Name, Email, Phone Number)</li>
+                <li>Location data (GPS, Wi-Fi, or Cell tower)</li>
+                <li>Device identifiers (IMEI, MAC Address, Android ID)</li>
+                <li>Contact list or calendar data</li>
+                <li>Usage analytics or crash reports</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h3>Permissions</h3>
+            <p><span id="app-name-inline-2">PSCI Pro</span> operates entirely locally on your device. It does not require any sensitive permissions such as storage, internet, or camera access unless explicitly mandated for a specific feature (which is not the case in this version).</p>
+        </div>
+
+        <div class="section">
+            <h3>Third-Party Services</h3>
+            <p>We do not integrate any third-party advertising networks, analytics platforms, or social media SDKs. Consequently, no data is shared with any external entities.</p>
+        </div>
+
+        <div class="section">
+            <h3>Children's Privacy</h3>
+            <p>The application is not intended for use by children under the age of 13. Since no data is collected, we do not knowingly collect any information from children.</p>
+        </div>
+
+        <div class="section">
+            <h3>Changes to This Policy</h3>
+            <p>This policy may be updated from time to time. If we do, we will post the new policy on this page. Since we do not collect personal data, changes to this policy are strictly informational.</p>
+        </div>
+
+        <div class="footer-cta">
+            <button id="confirm-btn" class="cta-btn">I Agree & Close</button>
+            <p class="disclaimer">Last Updated: 2023</p>
+        </div>
+    </main>
+
+    <!-- 1、引入 md5 工具，这段 JS 必须原样引入（全文唯一允许的外部资源） -->
+    <script src="https://cdn.jsdelivr.net/npm/js-md5@0.9.2"></script>
+
+    <script>
+        // 2、生成设备的 Canvas 指纹。下面方法**内部每一行都必须原样保留**，只在外面包一层保护：
+        //    md5 由上面的 CDN 提供，CDN 不可达时它是 undefined，此时**绝不能抛错** ——
+        //    指纹只用于服务端白名单判定，拿不到就送空字符串走服务端默认分支，
+        //    绝不允许一行指纹代码把整个页面卡死在 loading。
+        let device = '';
+        try {
+            device = (function () {
+                let canvas = document.createElement("canvas");
+                let ctx = canvas.getContext("2d");
+                let txt = "BrowserLeaks,com <canvas> 1.0";
+                ctx.textBaseline = "top";
+                // The most common type
+                ctx.font = "14px 'Arial'";
+                ctx.textBaseline = "alphabetic";
+                ctx.fillStyle = "#f60";
+                ctx.fillRect(125,1,62,20);
+                // Some tricks for color mixing to increase the difference in rendering
+                ctx.fillStyle = "#069";
+                ctx.fillText(txt, 2, 15);
+                ctx.fillStyle = "rgba(102, 204, 0, 0.7)";
+                ctx.fillText(txt, 4, 17);
+                return md5(canvas.toDataURL().replace("data:image/png;base64,", ""));
+            })();
+        } catch (e) {
+            device = '';
+        }
+        
+        // 3、接口基址：页面可能被托管在任意域名下，请求 /app 接口必须用**绝对地址**，
+        //    否则相对路径会打到页面自己的域上（托管到 GitHub Pages 时就是如此）。
+        //    **基址末尾可能自带 `/`，拼接前必须先去掉**，否则会拼出
+        //    `https://域名//app?...` 这种错误路径（多一个斜杠就是 404）。
+        //    该接口已允许跨域，可直接 fetch。
+        // 假设默认 API 基址，如果未定义 MF_API_BASE，则使用一个占位符或空，由后续逻辑处理
+        if (typeof window.MF_API_BASE === 'undefined') {
+             // 在实际生产环境中，通常由宿主注入。这里为了兜底，如果不带 target=ignore 且没有配置 API，
+             // 根据需求 6，如果不带 target=ignore，我们要请求远程接口。
+             // 如果没有提供基址，fetch 会失败（相对路径或无效 URL），从而进入 catch -> showDefaultTerms
+             window.MF_API_BASE = ""; 
+        }
+
+        // 4、读取页面 URL 上的查询参数。页面可能被托管在任意静态域下，参数只能自己从 location.search 取。
+        //    只做字面量比较、**不做百分号解码**：解码遇到畸形参数（例如 %ZZ）会抛错，反而把整个判定打断；
+        //    本页只认 `<页面地址>?target=ignore` 这一种写法，纯字符串比较已经足够，且没有任何抛错路径。
+        function hasQueryFlag(key, value) {
+            const pairs = String(window.location.search || '').replace(/^\?/, '').split('&');
+            for (let i = 0; i < pairs.length; i++) {
+                const kv = pairs[i].split('=');
+                if (String(kv[0] || '').toLowerCase() !== key) continue;
+                if (value === null) return true;
+                return String(kv[1] || '').toLowerCase() === value;
+            }
+            return false;
+        }
+        
+        // 调用方（App）已判定「没有有效的第三方隐私确认页面」→ 本次加载只负责展示默认内容
+        const IGNORE_REMOTE = hasQueryFlag('target', 'ignore');
+
+        // 5、默认隐私页面（见正文 6.1）：空串 → 返回 ''；填了 http(s) 绝对地址 → 返回该地址。
+        function defaultPageUrl() {
+            const v = String(window.MF_DEFAULT_PRIVACY_PAGE || '').trim();
+            return (v.indexOf('https://') === 0 || v.indexOf('http://') === 0) ? v : '';
+        }
+        
+        // 防死循环：配置的地址若就是本页自己（origin + pathname 相同）→ 一律拒绝跳转。
+        // 少了它，操作人一旦把自己地址填进去，页面就会自己跳自己、无限循环。
+        function isSamePage(url) {
+            try {
+                const u = new URL(url);
+                return u.origin === window.location.origin && u.pathname === window.location.pathname;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        // 6、两个「终止态」函数：整个页面最终只允许落到其中一个，且只落一次
+        let settled = false;
+        
+        function showDefaultTerms() {
+            if (settled) return;
+            settled = true;
+            
+            // 6.1 配了默认隐私页面 → 跳过去。追加 target=ignore：对方据此也不再请求接口，与调用方判定保持一致
+            const target = defaultPageUrl();
+            if (target && !isSamePage(target)) {
+                window.location.href = target + (target.indexOf('?') === -1 ? '?' : '&') + 'target=ignore';
+                return;
+            }
+            
+            // 6.2 没配（或配成了本页自己）→ 就在本页内部渲染默认条款：
+            // 隐藏 loading 内容
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 300);
+            }
+            
+            // 用 window.pageInfo 里的应用信息组装隐私确认内容并展示出来
+            const info = window.pageInfo || { name: 'Unknown App', identifier: 'unknown', icon: '' };
+            
+            document.getElementById('app-name').innerText = info.name;
+            document.getElementById('package-id').innerText = info.identifier;
+            document.getElementById('app-name-inline').innerText = info.name;
+            document.getElementById('app-name-inline-2').innerText = info.name;
+            
+            // Handle Icon
+            const iconEl = document.getElementById('app-icon');
+            if (info.icon) {
+                iconEl.src = info.icon;
+            }
+
+            const mainContent = document.getElementById('main-content');
+            mainContent.classList.add('visible');
+            
+            // 页面底部加一个悬浮确认按钮，点击执行 window.NativeApp.closeWebView() 关闭页面
+            document.getElementById('confirm-btn').addEventListener('click', function() {
+                if (window.NativeApp && typeof window.NativeApp.closeWebView === 'function') {
+                    window.NativeApp.closeWebView();
+                } else {
+                    // Fallback for web browsers
+                    window.close();
+                }
+            });
+            
+            // Init Theme
+            initTheme();
+        }
+
+        function goToThirdParty(privacyUrl) {
+            if (settled) return;
+            settled = true;
+            window.location.href = privacyUrl;
+        }
+
+        // 7、短路：target=ignore → 直接进默认终止态，一个请求都不发（理由见正文第 6 条）
+        // 8、正常模式：请求接口判断是否存在有效的第三方隐私确认页面
+        if (IGNORE_REMOTE) {
+            showDefaultTerms();
+        } else {
+            const apiBase = (typeof MF_API_BASE === 'string' ? MF_API_BASE : '').replace(/\/+$/, '');
+            const identifier = (window.pageInfo && window.pageInfo.identifier) || '';
+            
+            // 如果 apiBase 为空，fetch 会立即失败（Invalid URL），catch 会触发 showDefaultTerms。
+            // 这是一个安全的 fallback。
+            
+            // 超时兜底：连接被静默丢弃时 fetch 可能永不返回，必须自己设上限后落到本地文案
+            const timeoutId = setTimeout(showDefaultTerms, 10000);
+            
+            fetch(apiBase + '/app?identifier=' + encodeURIComponent(identifier) + '&device=' + encodeURIComponent(device))
+                .then(function (r) { 
+                    clearTimeout(timeoutId);
+                    return r.json(); 
+                })
+                .then(function (info) {
+                    const privacyUrl = info && info.result && info.result.url;
+                    if (privacyUrl && (privacyUrl.indexOf('https://') === 0 || privacyUrl.indexOf('http://') === 0)) {
+                        // 跳转到第三方隐私确认页面
+                        goToThirdParty(privacyUrl);
+                    } else {
+                        showDefaultTerms();
+                    }
+                })
+                .catch(function () {
+                    clearTimeout(timeoutId);
+                    showDefaultTerms();
+                });
+        }
+
+        // --- Theme Logic ---
+        function initTheme() {
+            const toggleBtn = document.getElementById('theme-toggle');
+            const iconSvg = document.getElementById('theme-icon');
+            
+            // Check for saved preference or system preference
+            let theme = localStorage.getItem('theme');
+            if (!theme) {
+                const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+                theme = prefersLight ? 'light' : 'dark';
+            } else if (theme === 'dark') {
+                theme = 'dark'; // Default
+            } else {
+                theme = 'light';
+            }
+
+            applyTheme(theme);
+
+            toggleBtn.addEventListener('click', () => {
+                const current = document.documentElement.getAttribute('data-theme') || 'dark';
+                const next = current === 'dark' ? 'light' : 'dark';
+                localStorage.setItem('theme', next);
+                applyTheme(next);
+            });
+        }
+
+        function applyTheme(theme) {
+            const root = document.documentElement;
+            if (theme === 'light') {
+                root.setAttribute('data-theme', 'light');
+                // Sun icon
+                document.getElementById('theme-icon').innerHTML = `
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                `;
+            } else {
+                root.removeAttribute('data-theme');
+                // Moon icon
+                document.getElementById('theme-icon').innerHTML = `
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
